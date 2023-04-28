@@ -1,0 +1,4 @@
+pymysql
+lxml
+python-dotenv
+flask

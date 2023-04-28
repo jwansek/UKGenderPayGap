@@ -1,0 +1,42 @@
+body {
+    font-family: Helvetica, sans-serif;
+}
+
+header {
+    font-size: large;
+    padding-left: 1%;
+    /* font-weight: bold; */
+}
+
+header p {
+    font-size: small;
+}
+
+a {
+    color: black;
+    font-weight: bold;
+    padding-top: 1px;
+}
+
+aside {
+    width: 15%;
+    padding-left: 15px;
+    margin-left: 15px;
+    float: right;
+    /* border-left-color: rgb(189, 189, 189);
+    border-left-width: 2px;
+    border-left-style: groove; */
+}
+
+#main_content {
+    padding-left: 2.5%;
+    padding-right: 2.5;
+}
+
+footer {
+    padding-left: 10%;
+    padding-right: 10%;
+    padding-top: 50px;
+    font-size: xx-small;
+    justify-content: center;
+}

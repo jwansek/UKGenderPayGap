@@ -1,0 +1,206 @@
+from dataclasses import dataclass
+import datetime
+import pymysql
+import os
+
+@dataclass
+class PayGapDatabase:
+    
+    host: str = "db"
+    user: str = "root"
+    passwd: str = None
+    db: str = "paygap"
+    port: int = 3306
+
+    def __enter__(self):
+        if self.passwd is None:
+            self.passwd = os.environ["MYSQL_ROOT_PASSWORD"]
+            
+        try:
+            self.__connection = self.__get_connection()
+        except Exception as e:
+            print(e)
+            if e.args[0] == 1049:
+                self.__connection = self.__build_db()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.__connection.close()
+
+    def __get_connection(self):
+        return pymysql.connect(
+            host = self.host,
+            port = self.port,
+            user = self.user,
+            passwd = self.passwd,
+            charset = "utf8mb4",
+            database = self.db
+        )
+
+    def __build_db(self):
+        print("Building database...")
+        self.__connection = pymysql.connect(
+            host = self.host,
+            port = self.port,
+            user = self.user,
+            passwd = self.passwd,
+            charset = "utf8mb4",
+        )
+        with self.__connection.cursor() as cursor:
+            # unsafe:
+            cursor.execute("CREATE DATABASE %s" % self.db)
+            cursor.execute("USE %s" % self.db)
+
+            cursor.execute("""
+            CREATE TABLE sic_sections(
+                sic_section_id CHAR(1) NOT NULL PRIMARY KEY,
+                sic_section_name VARCHAR(128) NOT NULL
+            );
+            """)
+
+            cursor.execute("""
+            CREATE TABLE sic(
+                sic_code INT UNSIGNED NOT NULL PRIMARY KEY,
+                sic_description VARCHAR(512) NOT NULL,
+                sic_section CHAR(1) NOT NULL,
+                FOREIGN KEY (sic_section) REFERENCES sic_sections(sic_section_id)
+            );
+            """)
+
+            cursor.execute("""
+            CREATE TABLE employer(
+                company_number CHAR(8) NOT NULL PRIMARY KEY,
+                name VARCHAR(512) NOT NULL,
+                address TEXT NOT NULL,
+                postcode VARCHAR(8) NOT NULL,
+                policy_link VARCHAR(256) NULL,
+                responsible_person VARCHAR(128) NOT NULL,
+                size VARCHAR(20) NOT NULL,
+                current_name VARCHAR(512) NULL,
+                status VARCHAR(32) NULL,
+                type_ VARCHAR(128) NULL,
+                incorporated DATETIME NULL
+            )
+            """)
+
+            cursor.execute("""
+            CREATE TABLE employer_sic(
+                company_number CHAR(8) NOT NULL,
+                sic_code INT UNSIGNED NOT NULL,
+                PRIMARY KEY (company_number, sic_code),
+                FOREIGN KEY (company_number) REFERENCES employer(company_number),
+                FOREIGN KEY (sic_code) REFERENCES sic(sic_code)
+            );
+            """)
+
+            cursor.execute("""
+            CREATE TABLE pay(
+                pay_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                company_number CHAR(8) NOT NULL,
+                source VARCHAR(64) NOT NULL,
+                date_submitted DATETIME NOT NULL,
+                DiffMeanHourlyPercent DECIMAL(8,3) NOT NULL,
+                DiffMedianHourlyPercent DECIMAL(8,3) NOT NULL,
+                DiffMeanBonusPercent DECIMAL(8,3) NOT NULL,
+                DiffMedianBonusPercent DECIMAL(8,3) NOT NULL,
+                MaleBonusPercent DECIMAL(8,3) NOT NULL,
+                FemaleBonusPercent DECIMAL(8,3) NOT NULL,
+                MaleLowerQuartile DECIMAL(8,3) NOT NULL,
+                FemaleLowerQuartile DECIMAL(8,3) NOT NULL,
+                MaleLowerMiddleQuartile DECIMAL(8,3) NOT NULL,
+                FemaleLowerMiddleQuartile DECIMAL(8,3) NOT NULL,
+                MaleUpperMiddleQuartile DECIMAL(8,3) NOT NULL,
+                FemaleUpperMiddleQuartile DECIMAL(8,3) NOT NULL,
+                MaleTopQuartile DECIMAL(8,3) NOT NULL,
+                FemaleTopQuartile DECIMAL(8,3) NOT NULL,
+                FOREIGN KEY (company_number) REFERENCES employer(company_number)
+            );
+            """)
+
+            self.__connection.commit()
+            return self.__connection
+
+    def append_sic_sections(self, section_id, description):
+        # print("Section ID: '%s', Description: '%s'" % (section_id, description))
+        with self.__connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO sic_sections VALUES (%s, %s) ON DUPLICATE KEY UPDATE sic_section_name = %s;
+            """, (section_id, description, description))
+        self.__connection.commit()
+
+    def append_sic(self, code, description, section_id):
+        print("Appended code %d (%s) under section %s" % (code, description, section_id))
+        with self.__connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO sic VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE sic_description = %s, sic_section = %s;
+            """, (code, description, section_id, description, section_id))
+        self.__connection.commit()
+
+    def append_employer(self, company_number, name, address, postcode, policy_link, responsible_person, size, current_name, \
+        status, type_, incorporated, sics):
+
+        # print("incorporated: %s" % str(incorporated))
+        # print("sics", sics)
+        # print("name: %s" % name)
+        with self.__connection.cursor() as cursor:
+            cursor.execute("""
+            INSERT INTO employer (company_number, name, address, postcode, policy_link, responsible_person, size, current_name, status, type_, incorporated) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+            name = %s, address = %s, postcode = %s, policy_link = %s, responsible_person = %s, size = %s, 
+            current_name = %s, status = %s, type_ = %s, incorporated = %s;
+            """, (
+                company_number, name, address, postcode, policy_link, responsible_person, size, current_name, status, type_, incorporated,
+                name, address, postcode, policy_link, responsible_person, size, current_name, status, type_, incorporated
+            ))
+            # sql = """INSERT INTO employer (company_number, name, address, postcode, policy_link, responsible_person, size, current_name, status, type_, incorporated) 
+            # VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');""" % (
+            #     company_number, name, address, postcode, policy_link, responsible_person, size, current_name, status, type_, incorporated
+            # )
+            # print(sql)
+
+        self.append_employer_sics(company_number, sics)
+        self.__connection.commit()
+
+    def append_pay_info(self, company_number, source, date_submitted, diff_mean_hourly_percent, diff_median_hourly_percent, \
+        diff_mean_bonus_percent, diff_median_bonus_percent, male_bonus_percent, female_bonus_percent, male_lower_quartile, \
+        female_lower_quartile, male_lower_middle_quartile, female_lower_middle_quartile, male_upper_middle_quartile, \
+        female_upper_middle_quartile, male_top_quartile, female_top_quartile):
+
+        try:
+            float(diff_mean_hourly_percent)
+        except ValueError:
+            diff_mean_hourly_percent = None
+
+
+        with self.__connection.cursor() as cursor:
+            cursor.execute("DELETE FROM pay WHERE company_number = %s AND source = %s;", (company_number, source))
+
+            try:
+                cursor.execute("""
+                INSERT INTO pay (company_number, source, date_submitted, DiffMeanHourlyPercent, DiffMedianHourlyPercent,
+                DiffMeanBonusPercent, DiffMedianBonusPercent, MaleBonusPercent, FemaleBonusPercent, MaleLowerQuartile,
+                FemaleLowerQuartile, MaleLowerMiddleQuartile, FemaleLowerMiddleQuartile, MaleUpperMiddleQuartile,
+                FemaleUpperMiddleQuartile, MaleTopQuartile, FemaleTopQuartile) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                );
+                """, (
+                    company_number, source, date_submitted, diff_mean_hourly_percent, diff_median_hourly_percent,
+                    diff_mean_bonus_percent, diff_median_bonus_percent, male_bonus_percent, female_bonus_percent, male_lower_quartile,
+                    female_lower_quartile, male_lower_middle_quartile, female_lower_middle_quartile, male_upper_middle_quartile,
+                    female_upper_middle_quartile, male_top_quartile, female_top_quartile
+                ))
+            except pymysql.err.DataError:
+                return
+
+        self.__connection.commit()
+
+
+    def append_employer_sics(self, company_number, sics):
+        with self.__connection.cursor() as cursor:
+            cursor.execute("DELETE FROM employer_sic WHERE company_number = %s", (company_number, ))
+
+            for sic in sics:
+                cursor.execute("SELECT * FROM sic WHERE sic_code = %s", (sic, ))
+                if cursor.fetchone() != None:
+                    cursor.execute("INSERT INTO employer_sic VALUES (%s, %s);", (company_number, sic))

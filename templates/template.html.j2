@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>UK Gender Pay Gap :: {{ title }}</title>
+	<!-- JQuery and JQurty UI current version -->
+    <script src='https://code.jquery.com/jquery-3.6.0.js'></script>
+	<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+
+	<!-- Highcharts libraries -->
+	<script type="text/javascript" src="https://code.highcharts.com/highcharts.js"></script>
+	<script type="text/javascript" src="https://code.highcharts.com/highcharts-more.js"></script>
+	<script type="text/javascript" src="https://code.highcharts.com/modules/exporting.js"></script>
+	<script type="text/javascript" src="https://code.highcharts.com/modules/export-data.js"></script>
+	<script type="text/javascript" src="https://code.highcharts.com/modules/accessibility.js"></script>	
+	
+	<script type="text/javascript" src="https://code.highcharts.com/maps/modules/map.js"></script>
+	<script type="text/javascript" src="https://code.highcharts.com/mapdata/custom/world-robinson.js"></script>
+
+	<!-- local Javascript files -->
+	<script type="text/javascript" src="{{ url_for('static', filename='scripts.js') }}"></script>
+	<!-- remote and local CSS stylesheet -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header>
+        <h1>{{ title }}</h1>
+        <p>Data provided by the <a href="https://gender-pay-gap.service.gov.uk/">UK Government</a></p>
+    </header>
+
+    <aside>
+        <h4>Filter...</h4>
+    </aside>
+
+    <div id="main_content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <footer>
+        <p>Source code released under GPLv3</p>
+    </footer>
+</body>
