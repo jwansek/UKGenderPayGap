@@ -70,13 +70,12 @@ def lookup_company(company_number):
     return company
 
 if __name__ == "__main__":
-    # if not os.path.exists(".docker"):
-    #     import dotenv
-    #     dotenv.load_dotenv(dotenv_path = "db.env")
-    #     host = "srv.home"
-    # else:
-    #     host = "db"
+    if not os.path.exists(".docker"):
+        import dotenv
+        dotenv.load_dotenv(dotenv_path = "db.env")
+        host = "localhost"
+    else:
+        host = "db"
 
-    # with database.PayGapDatabase(host = host) as db:
-    #     get_sics(db)
-    print(lookup_company("02838054"))
+    with database.PayGapDatabase(host = host) as db:
+        print(db.search_company("University"))

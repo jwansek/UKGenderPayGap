@@ -28,6 +28,22 @@ aside {
     border-left-style: groove; */
 }
 
+input[type=search] {
+    padding: 3px 5px;
+    box-sizing: border-box;
+    border: 2px solid black;
+    width: 100%;
+}
+
+aside form input[type=submit] {
+    margin-top: 3px;
+    width: 100%;
+    background-color: black;
+    color: white;
+    border-radius: 5px;
+    border: 2px solid black;
+}
+
 #main_content {
     padding-left: 2.5%;
     padding-right: 2.5;

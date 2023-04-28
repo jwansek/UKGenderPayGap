@@ -120,6 +120,9 @@ class PayGapDatabase:
             self.__connection.commit()
             return self.__connection
 
+    def _wrap_percent(self, word):
+        return "%%%s%%" % (word)
+
     def append_sic_sections(self, section_id, description):
         # print("Section ID: '%s', Description: '%s'" % (section_id, description))
         with self.__connection.cursor() as cursor:
@@ -204,3 +207,16 @@ class PayGapDatabase:
                 cursor.execute("SELECT * FROM sic WHERE sic_code = %s", (sic, ))
                 if cursor.fetchone() != None:
                     cursor.execute("INSERT INTO employer_sic VALUES (%s, %s);", (company_number, sic))
+
+    def search_company(self, company_prefix):
+        with self.__connection.cursor() as cursor:
+            cursor.execute("""
+            SELECT name, company_number FROM employer 
+            WHERE name LIKE '%s' OR current_name LIKE '%s'
+            LIMIT 10;
+            """ % (
+                self._wrap_percent(company_prefix),
+                self._wrap_percent(company_prefix)
+            ))
+
+            return [(i[0].title(), i[1]) for i in cursor.fetchall()]

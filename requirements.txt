@@ -2,3 +2,4 @@ pymysql
 lxml
 python-dotenv
 flask
+requests
