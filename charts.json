@@ -1,0 +1,20 @@
+{
+    "index": [
+        {
+            "title": "Median Hourly Pay Difference",
+            "url": "/plot/medianhourly"
+        },
+        {
+            "title": "Median Bonus Pay Difference",
+            "url": "/plot/medianbonus"
+        },
+        {
+            "title": "Pay Difference by SIC Section REallt LONNNNNNNNNNNNNNNNNNNNNNNGGGGGGGGGGGGG",
+            "url": "/plot/sic-section"
+        },
+        {
+            "title": "Pay Gay by Company Size",
+            "url": "/plot/company-size"   
+        }
+    ]
+}

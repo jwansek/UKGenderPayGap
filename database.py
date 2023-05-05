@@ -212,8 +212,7 @@ class PayGapDatabase:
         with self.__connection.cursor() as cursor:
             cursor.execute("""
             SELECT name, company_number FROM employer 
-            WHERE name LIKE '%s' OR current_name LIKE '%s'
-            LIMIT 10;
+            WHERE name LIKE '%s' OR current_name LIKE '%s';
             """ % (
                 self._wrap_percent(company_prefix),
                 self._wrap_percent(company_prefix)

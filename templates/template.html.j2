@@ -25,14 +25,14 @@
 
 <body>
     <header>
-        <h1>{{ title }}</h1>
+        <a href="/"><h1>{{ title }}</h1></a>
         <p>Data provided by the <a href="https://gender-pay-gap.service.gov.uk/">UK Government</a></p>
     </header>
 
     <aside>
-        <form id="searchform">
-            <input type="search" value="Search...">
-            <input type="submit" value="Search">
+        <form id="searchform" action="/search_click" method="POST">
+            <input type="search" id="search_entry" name="search" required>
+            <input type="submit" value="Search" id="search_btn">
         </form>
         <h4>Filter...</h4>
     </aside>

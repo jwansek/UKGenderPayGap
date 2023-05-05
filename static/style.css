@@ -16,6 +16,11 @@ a {
     color: black;
     font-weight: bold;
     padding-top: 1px;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 aside {
@@ -47,6 +52,32 @@ aside form input[type=submit] {
 #main_content {
     padding-left: 2.5%;
     padding-right: 2.5;
+}
+
+/* #multicharts ul {
+    
+} */
+
+#multicharts ul li {
+    list-style-type: none;
+    width: 25%;
+    display: inline-block;
+    background-color: pink;
+    min-height: 250px;
+    margin-bottom: 7px;
+}
+
+.chart_container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.minichart {
+    min-height: 220px;
+    width: 95%;
+    background-color: red;
 }
 
 footer {

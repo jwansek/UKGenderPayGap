@@ -1,0 +1,16 @@
+{% extends "template.html.j2" %}
+{% block content %}
+    <div id="search">
+        {% if companies == [] %}
+            <a>There were no results for that search. Please refine your search.</a>
+        {% else %}
+            <ul>
+                {% for name, id_ in companies %}
+                    <li>
+                        <a href="{{ '/company/%s' % id_ }}">{{ name }}</a>
+                    </li>  
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endblock %}

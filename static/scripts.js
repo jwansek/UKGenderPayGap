@@ -1,1 +1,3 @@
-console.log("foo!")
+$(document).ready(function() {
+    console.log("ready!")
+});
