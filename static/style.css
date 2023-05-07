@@ -1,57 +1,57 @@
 body {
-    font-family: Helvetica, sans-serif;
+  font-family: Helvetica, sans-serif;
 }
 
 header {
-    font-size: large;
-    padding-left: 1%;
-    /* font-weight: bold; */
+  font-size: large;
+  padding-left: 1%;
+  /* font-weight: bold; */
 }
 
 header p {
-    font-size: small;
+  font-size: small;
 }
 
 a {
-    color: black;
-    font-weight: bold;
-    padding-top: 1px;
-    text-decoration: none;
+  color: black;
+  font-weight: bold;
+  padding-top: 1px;
+  text-decoration: none;
 }
 
 a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 aside {
-    width: 15%;
-    padding-left: 15px;
-    margin-left: 15px;
-    float: right;
-    /* border-left-color: rgb(189, 189, 189);
+  width: 15%;
+  padding-left: 15px;
+  margin-left: 15px;
+  float: right;
+  /* border-left-color: rgb(189, 189, 189);
     border-left-width: 2px;
     border-left-style: groove; */
 }
 
-input[type=search] {
-    padding: 3px 5px;
-    box-sizing: border-box;
-    border: 2px solid black;
-    width: 100%;
+input[type="search"] {
+  padding: 3px 5px;
+  box-sizing: border-box;
+  border: 2px solid black;
+  width: 100%;
 }
 
-aside form input[type=submit] {
-    margin-top: 3px;
-    width: 100%;
-    background-color: black;
-    color: white;
-    border-radius: 5px;
-    border: 2px solid black;
+aside form input[type="submit"] {
+  margin-top: 3px;
+  width: 100%;
+  background-color: black;
+  color: white;
+  border-radius: 5px;
+  border: 2px solid black;
 }
 
 #main_content {
-    padding-left: 2.5%;
-    padding-right: 2.5;
+  padding-left: 2.5%;
+  padding-right: 2.5;
 }
 
 /* #multicharts ul {
@@ -59,31 +59,38 @@ aside form input[type=submit] {
 } */
 
 #multicharts ul li {
-    list-style-type: none;
-    width: 25%;
-    display: inline-block;
-    background-color: pink;
-    min-height: 250px;
-    margin-bottom: 7px;
+  list-style-type: none;
+  width: 25%;
+  display: inline-flex;
+  background-color: pink;
+  min-height: 250px;
+  margin-bottom: 7px;
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .chart_container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  flex-direction: row-reverse;
+}
+.minichart {
+  min-height: 220px;
+  width: 100%;
+  margin: 0.5rem;
+  background-color: red;
 }
 
-
-.minichart {
-    min-height: 220px;
-    width: 95%;
-    background-color: red;
+.bottom_text {
+  display: inline-flex;
+  margin: 0.5rem;
+  overflow: auto;
 }
 
 footer {
-    padding-left: 10%;
-    padding-right: 10%;
-    padding-top: 50px;
-    font-size: xx-small;
-    justify-content: center;
+  padding-left: 10%;
+  padding-right: 10%;
+  padding-top: 50px;
+  font-size: xx-small;
+  justify-content: center;
 }

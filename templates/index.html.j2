@@ -6,8 +6,9 @@
                 <li>
                     <div class="chart_container">
                         <div class="minichart" id="/minichart{{ elem['url'] }}">
-                        <a href="{{ elem['url'] }}">{{ elem['title'] }}</a>
+                        </div>
                     </div>
+                    <a class="bottom_text" href="{{ elem['url'] }}">{{ elem['title'] }}</a>
                 </li>
             {% endfor %}
         </ul>
