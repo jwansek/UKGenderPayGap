@@ -34,7 +34,39 @@
             <input type="search" id="search_entry" name="search" required>
             <input type="submit" value="Search" id="search_btn">
         </form>
-        <h4>Filter...</h4>
+        {% if filters is defined %}
+            <h4>Filters</h4>
+            <form id="filterform">
+                {% for filter_name, filter_content in filters.items() %}
+                    <h5>{{ filter_name }}</h5>
+                    {% if len(filter_content["options"]) > 5 %}
+                        <button class="collapsetoggle" id="collapsetoggle/{{ filter_name }}" onclick="collapseTogglePress('collapsable/{{ filter_name }}')">
+                            {{ "Un-hide %d hidden filters" % len(filter_content["options"]) }}
+                        </button>
+                        <div class="collapsable" id="collapsable/{{ filter_name }}">
+                    {% endif %}
+                    {% for option in filter_content["options"] %}
+                        {% if filter_name in current_filters.keys() %}
+                            {% if current_filters[filter_name] == option %}
+                                <input type="radio" id="{{ option }}" name="{{ filter_name }}" value = "{{ option }}" checked="checked">
+                            {% else %}
+                                <input type="radio" id="{{ option }}" name="{{ filter_name }}" value = "{{ option }}">
+                            {% endif %}
+                        {% else %}
+                            <input type="radio" id="{{ option }}" name="{{ filter_name }}" value = "{{ option }}">
+                        {% endif %}
+                        <label for="{{ option }}">{{ option }}</label><br>
+                    {% endfor %}
+                    {% if len(filter_content["default"]) < 2 %}
+                        <input type="radio" id="No filter" name="{{ filter_name }}" value = "No filter">
+                        <label for="No filter">No filter</label><br>
+                    {% endif %}
+                    {% if len(filter_content["options"]) > 5 %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </form>
+        {% endif %}
     </aside>
 
     <div id="main_content">

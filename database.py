@@ -219,3 +219,40 @@ class PayGapDatabase:
             ))
 
             return [(i[0].title(), i[1]) for i in cursor.fetchall()]
+
+    def get_company_types(self):
+        with self.__connection.cursor() as cursor:
+            cursor.execute("SELECT DISTINCT type_ FROM employer WHERE type_ IS NOT NULL;")
+            return [i[0] for i in cursor.fetchall()]
+
+    def get_company_sizes(self):
+        return [
+            "Not Provided",
+            "Less than 250",
+            "250 to 499",
+            "500 to 999",
+            "1000 to 4999",
+            "5000 to 19,999",
+            "20,000 or more"
+        ]
+
+    def get_sic_sections(self):
+        with self.__connection.cursor() as cursor:
+            cursor.execute("SELECT sic_section_name FROM sic_sections")
+            return [i[0] for i in cursor.fetchall()]
+
+    def _source_name_to_year(self, source):
+        return os.path.splitext(source)[0].split("-")[-1].strip().replace("to", "-")
+
+    def get_pay_by_year(self, pay_type):
+        sql = "SELECT source, -AVG("
+        if pay_type.lower() == "hourly":
+            sql += "DiffMedianHourlyPercent"
+        elif pay_type.lower() == "bonuses":
+            sql += "DiffMedianBonusPercent"
+        sql += ") FROM pay GROUP BY source ORDER BY source;"
+
+        with self.__connection.cursor() as cursor:
+            cursor.execute(sql)
+            return [(self._source_name_to_year(i[0]), float(i[1])) for i in cursor.fetchall()]
+

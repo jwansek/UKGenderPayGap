@@ -15,18 +15,32 @@ else:
 
 @app.route("/")
 def serve_index():
-    with open("charts.json", "r") as f:
-        charts = json.load(f)
-
     return flask.render_template(
         "index.html.j2",
         title = "UK Gender Pay Gap",
-        charts = charts["index"]
+        charts = get_charts()["index"]
     )
+
+def get_charts():
+    with open("charts.json", "r") as f:
+        return json.load(f)
+
+@app.route("/api/charts.json")
+def serve_charts():
+    return flask.jsonify(get_charts())
+
 
 @app.route("/search_click", methods = ["POST"])
 def search_redirect():
     return flask.redirect("/search?s=%s" % urllib.parse.quote_plus(dict(flask.request.form)["search"]))
+
+@app.route("/api/years")
+def api_get_years():
+    pay_type = flask.request.args.get("Pay Type")
+    if pay_type is None or pay_type.lower() not in {'hourly', 'bonuses'}:
+        return flask.abort(400, "The key `pay type` must be equal to 'hourly' or 'bonuses'")
+    with database.PayGapDatabase(host = host) as db:
+        return flask.jsonify(db.get_pay_by_year(pay_type))
 
 @app.route("/search")
 def search():
@@ -41,6 +55,34 @@ def search():
             title = "Search",
             companies = companies
         )
+
+def get_chart_elem(url):
+    for i in get_charts()["index"]:
+        if i["url"] == url:
+            return i
+
+
+@app.route("/plot/<name>")
+def serve_large_plot(name):
+    with database.PayGapDatabase(host = host) as db:
+        elem = get_chart_elem(flask.request.full_path)
+        filters = elem["filters"]
+        for k, v in filters.items():
+            if v == "<SICType>":
+                filters[k] = {"options": db.get_sic_sections()}
+
+    current_filters = dict(flask.request.args)
+    print(filters)
+    print(current_filters)
+    return flask.render_template(
+        "plot.html.j2",
+        title = elem["title"],
+        elem = elem,
+        alt = "Lorem ipsum.",
+        filters = filters,
+        current_filters = current_filters,
+        len = len
+    )
 
 if __name__ == "__main__":
     app.run("0.0.0.0", port = 5005, debug = True)

@@ -1,12 +1,36 @@
 {
     "index": [
         {
-            "title": "Median Hourly Pay Difference",
-            "url": "/plot/medianhourly"
+            "title": "Median Hourly Pay Difference by Year",
+            "url": "/plot/years?Pay+Type=Hourly",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Hourly"
+                },
+                "SIC Type": "<SICType>",
+                "Employer Type": "<CompanyType>",
+                "Employer Size": "<CompanySize>"
+            }
         },
         {
-            "title": "Median Bonus Pay Difference",
-            "url": "/plot/medianbonus"
+            "title": "Median Bonus Pay Difference by Year",
+            "url": "/plot/years?Pay+Type=Bonuses",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Hourly"
+                },
+                "SIC Type": "<SICType>",
+                "Employer Type": "<CompanyType>",
+                "Employer Size": "<CompanySize>"
+            }
         },
         {
             "title": "Pay Difference by SIC Section REallt LONNNNNNNNNNNNNNNNNNNNNNNGGGGGGGGGGGGG",

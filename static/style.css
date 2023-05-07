@@ -49,6 +49,31 @@ aside form input[type="submit"] {
   border: 2px solid black;
 }
 
+#filterform h5 {
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+label {
+  font-size: x-small;
+}
+
+.collapsable {
+  display: none;
+}
+
+.collapsetoggle {
+  color: black;
+  font-weight: bold;
+  padding-top: 1px;
+  text-decoration: none;
+}
+
+.collapsetoggle#hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 #main_content {
   padding-left: 2.5%;
   padding-right: 2.5;
@@ -62,23 +87,38 @@ aside form input[type="submit"] {
   list-style-type: none;
   width: 25%;
   display: inline-flex;
-  background-color: pink;
+  /* background-color: pink; */
   min-height: 250px;
   margin-bottom: 7px;
   overflow: hidden;
   flex-direction: column;
   justify-content: space-between;
+  /* border-color: black;
+  border-width: 2px;
+  border-radius: 1;
+  border-style: ridge; */
 }
 
 .chart_container {
   display: flex;
   flex-direction: row-reverse;
 }
+
 .minichart {
   min-height: 220px;
   width: 100%;
   margin: 0.5rem;
-  background-color: red;
+  /* background-color: red; */
+}
+
+#singlechart {
+  /* background-color: pink; */
+  width: 70%;
+  min-height: 70%;
+}
+
+.chart {
+  
 }
 
 .bottom_text {

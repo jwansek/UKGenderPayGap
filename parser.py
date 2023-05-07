@@ -78,4 +78,4 @@ if __name__ == "__main__":
         host = "db"
 
     with database.PayGapDatabase(host = host) as db:
-        parse_csv(db, sys.argv[1])
+        print(db.get_sic_sections())
