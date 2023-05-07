@@ -13,7 +13,11 @@ const PLOT_FUNC_MAPPINGS = {
 }
 
 $(document).ready(function() {
-    document.getElementById("filterform").action = window.location.pathname + "/apply_click";
+    const filterform = document.getElementById("filterform");
+    if (filterform !== null) {
+        filterform.action = window.location.pathname + "/apply_click";
+    }
+    
 
     fetch("/api/charts.json").then((resp) => {
         resp.json().then((body) => {
@@ -41,8 +45,10 @@ $(document).ready(function() {
                 var theIdSplit = u.pathname.split("/");
 
                 CHARTS["index"].forEach(element => {
-                    if (theId === "/chart" + element.url) {
+                    if (location.href.substr(location.href.indexOf(location.host)+location.host.length).startsWith(element["url"])) {
+                        console.log(location.href.substr(location.href.indexOf(location.host)+location.host.length), element["url"]);
                         filters = element["filters"];
+                        // console.log(element);
                     }
                 });
 
@@ -53,17 +59,20 @@ $(document).ready(function() {
 });
 
 function form_api_url(containerName, filters) {
+    console.log(filters);
+    console.log(containerName);
     var name = containerName.split("/")[containerName.split("/").length - 1];
     var url = new URL(window.location.origin + "/api/" + name);
-    for (const [filterName, value] of Object.entries(filters)) {
+    // for (const [filterName, value] of Object.entries(filters)) {
         
-        if (typeof value === 'object' && value !== null) {
-            if ("default" in value) {
-                // console.log(filterName, value["default"]);
-                url.searchParams.append(filterName, value["default"]);
-            }
-        }       
-    }
+    //     if (typeof value === 'object' && value !== null) {
+    //         if ("default" in value) {
+    //             // console.log(filterName, value["default"]);
+    //             url.searchParams.append(filterName, value["default"]);
+    //         }
+    //     }       
+    // }
+    console.log("fetching ", url.toString());
     return url.toString();
 }
 

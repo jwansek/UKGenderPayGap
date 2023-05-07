@@ -244,15 +244,64 @@ class PayGapDatabase:
     def _source_name_to_year(self, source):
         return os.path.splitext(source)[0].split("-")[-1].strip().replace("to", "-")
 
-    def get_pay_by_year(self, pay_type):
+    def get_pay_by_year(self, pay_type, sic_section_name = None, employer_type = None, employer_size = None):
         sql = "SELECT source, -AVG("
         if pay_type.lower() == "hourly":
             sql += "DiffMedianHourlyPercent"
         elif pay_type.lower() == "bonuses":
             sql += "DiffMedianBonusPercent"
-        sql += ") FROM pay GROUP BY source ORDER BY source;"
+        sql += ") FROM pay"
+
+        subqueries = []
+        args = []
+        if sic_section_name is not None:
+            subqueries.append("""
+            company_number IN (
+                SELECT DISTINCT company_number FROM employer_sic WHERE sic_code IN (
+                    SELECT DISTINCT sic_code FROM sic WHERE sic_section = (
+                        SELECT sic_section_id FROM sic_sections WHERE sic_section_name = %s
+                    )
+                )
+            )""")
+            args.append(sic_section_name)
+        if employer_type is not None:
+            subqueries.append("""
+            company_number IN (
+                SELECT company_number FROM employer WHERE type_ = %s
+            )
+            """)
+            args.append(employer_type)
+        if employer_size is not None:
+            subqueries.append("""
+            company_number IN (
+                SELECT company_number FROM employer WHERE size = %s
+            )
+            """)
+            args.append(employer_size)
 
         with self.__connection.cursor() as cursor:
-            cursor.execute(sql)
+            if sic_section_name is not None or employer_type is not None or employer_size is not None:
+                sql += " WHERE {}".format(" OR ".join(subqueries))
+
+                sql += " GROUP BY source ORDER BY source;"
+                cursor.execute(sql, tuple(args))
+
+            else:
+                sql += " GROUP BY source ORDER BY source;"
+                cursor.execute(sql)
+
+            # print(sql)
+            # print(tuple(args))
             return [(self._source_name_to_year(i[0]), float(i[1])) for i in cursor.fetchall()]
+
+if __name__ == "__main__":
+    if not os.path.exists(".docker"):
+        import dotenv
+        dotenv.load_dotenv(dotenv_path = "db.env")
+        host = "srv.home"
+    else:
+        host = "db"
+
+    with PayGapDatabase(host = host) as db:
+        print(db.get_pay_by_year("hourly", None, None, "20,000 or more"))
 

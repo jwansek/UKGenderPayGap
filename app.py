@@ -41,16 +41,22 @@ def apply_redirect(name):
         if v != "No filter":
             new_args[k] = v
 
-    print("/" + "/".join(flask.request.full_path.split("/")[1:-1]) + "?" + urllib.parse.urlencode(new_args))
+    # print("/" + "/".join(flask.request.full_path.split("/")[1:-1]) + "?" + urllib.parse.urlencode(new_args))
     return flask.redirect("/" + "/".join(flask.request.full_path.split("/")[1:-1]) + "?" + urllib.parse.urlencode(new_args))
 
 @app.route("/api/years")
 def api_get_years():
     pay_type = flask.request.args.get("Pay Type")
+    sic_type = flask.request.args.get("SIC Type")
+    employer_type = flask.request.args.get("Employer Type")
+    employer_size = flask.request.args.get("Employer Size")
+    # print("sic_type", sic_type)
+    # print("employer_type", employer_type)
+    # print("employer_size", employer_size)
     if pay_type is None or pay_type.lower() not in {'hourly', 'bonuses'}:
         return flask.abort(400, "The key `pay type` must be equal to 'hourly' or 'bonuses'")
     with database.PayGapDatabase(host = host) as db:
-        return flask.jsonify(db.get_pay_by_year(pay_type))
+        return flask.jsonify(db.get_pay_by_year(pay_type, sic_section_name = sic_type, employer_size = employer_size, employer_type = employer_type))
 
 @app.route("/search")
 def search():
@@ -68,14 +74,16 @@ def search():
 
 def get_chart_elem(url):
     for i in get_charts()["index"]:
-        if urllib.parse.urlparse(i["url"]).path ==  urllib.parse.urlparse(url).path:
+        print(i["url"], url)
+        # if i["url"] == url:
+        #     return i
+        if url.startswith(i["url"]):
             return i
-
 
 @app.route("/plot/<name>")
 def serve_large_plot(name):
     with database.PayGapDatabase(host = host) as db:
-        print(flask.request.full_path)
+        # print(flask.request.full_path)
         elem = get_chart_elem(flask.request.full_path)
         filters = elem["filters"]
         for k, v in filters.items():
@@ -86,7 +94,10 @@ def serve_large_plot(name):
             if v == "<CompanySize>":
                  filters[k] = {"options": db.get_company_sizes()}
 
+    elem["url"] = flask.request.full_path
+    # print("elem", elem)
     current_filters = dict(flask.request.args)
+    # print("current_filters", current_filters)
     return flask.render_template(
         "plot.html.j2",
         title = elem["title"],
