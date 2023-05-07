@@ -36,13 +36,13 @@
         </form>
         {% if filters is defined %}
             <h4>Filters</h4>
-            <form id="filterform">
+            <form id="filterform" method="POST">
                 {% for filter_name, filter_content in filters.items() %}
                     <h5>{{ filter_name }}</h5>
                     {% if len(filter_content["options"]) > 5 %}
-                        <button class="collapsetoggle" id="collapsetoggle/{{ filter_name }}" onclick="collapseTogglePress('collapsable/{{ filter_name }}')">
+                        <a class="collapsetoggle" id="collapsetoggle/{{ filter_name }}" onclick="collapseTogglePress('collapsable/{{ filter_name }}', 'collapsetoggle/{{ filter_name }}', {{ len(filter_content['options']) }})" href="javascript:void(0);">
                             {{ "Un-hide %d hidden filters" % len(filter_content["options"]) }}
-                        </button>
+                        </a>
                         <div class="collapsable" id="collapsable/{{ filter_name }}">
                     {% endif %}
                     {% for option in filter_content["options"] %}
@@ -65,6 +65,7 @@
                         </div>
                     {% endif %}
                 {% endfor %}
+                <input type="submit" value="Apply" id="apply_btn">
             </form>
         {% endif %}
     </aside>

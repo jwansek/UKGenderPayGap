@@ -34,6 +34,16 @@ def serve_charts():
 def search_redirect():
     return flask.redirect("/search?s=%s" % urllib.parse.quote_plus(dict(flask.request.form)["search"]))
 
+@app.route("/plot/<name>/apply_click", methods = ["POST"])
+def apply_redirect(name):
+    new_args = {}
+    for k, v in flask.request.form.items():
+        if v != "No filter":
+            new_args[k] = v
+
+    print("/" + "/".join(flask.request.full_path.split("/")[1:-1]) + "?" + urllib.parse.urlencode(new_args))
+    return flask.redirect("/" + "/".join(flask.request.full_path.split("/")[1:-1]) + "?" + urllib.parse.urlencode(new_args))
+
 @app.route("/api/years")
 def api_get_years():
     pay_type = flask.request.args.get("Pay Type")
@@ -58,22 +68,25 @@ def search():
 
 def get_chart_elem(url):
     for i in get_charts()["index"]:
-        if i["url"] == url:
+        if urllib.parse.urlparse(i["url"]).path ==  urllib.parse.urlparse(url).path:
             return i
 
 
 @app.route("/plot/<name>")
 def serve_large_plot(name):
     with database.PayGapDatabase(host = host) as db:
+        print(flask.request.full_path)
         elem = get_chart_elem(flask.request.full_path)
         filters = elem["filters"]
         for k, v in filters.items():
             if v == "<SICType>":
                 filters[k] = {"options": db.get_sic_sections()}
+            if v == "<CompanyType>":
+                filters[k] = {"options": db.get_company_types()}
+            if v == "<CompanySize>":
+                 filters[k] = {"options": db.get_company_sizes()}
 
     current_filters = dict(flask.request.args)
-    print(filters)
-    print(current_filters)
     return flask.render_template(
         "plot.html.j2",
         title = elem["title"],

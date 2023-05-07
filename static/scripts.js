@@ -1,5 +1,11 @@
-function collapseTogglePress(elem) {
-    console.log("elem");
+function collapseTogglePress(elem, a_elem, num_hidden) {
+    if (getComputedStyle(document.getElementById(elem)).display === "none") {
+        document.getElementById(elem).style.display = "block";
+        document.getElementById(a_elem).innerText = `Hide ${num_hidden} filters`
+    } else {
+        document.getElementById(elem).style.display = "none";
+        document.getElementById(a_elem).innerText =`Un-hide ${num_hidden} hidden filters`
+    }
 }
 
 const PLOT_FUNC_MAPPINGS = {
@@ -7,7 +13,7 @@ const PLOT_FUNC_MAPPINGS = {
 }
 
 $(document).ready(function() {
-    console.log("ready!");
+    document.getElementById("filterform").action = window.location.pathname + "/apply_click";
 
     fetch("/api/charts.json").then((resp) => {
         resp.json().then((body) => {
