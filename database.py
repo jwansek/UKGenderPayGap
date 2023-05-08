@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import operator
 import datetime
 import pymysql
 import os
@@ -294,6 +295,49 @@ class PayGapDatabase:
             # print(tuple(args))
             return [(self._source_name_to_year(i[0]), float(i[1])) for i in cursor.fetchall()]
 
+    def get_years(self):
+        with self.__connection.cursor() as cursor:
+            cursor.execute("SELECT DISTINCT source FROM pay;")
+            return [self._source_name_to_year(i[0]) for i in cursor.fetchall()]
+    
+    def get_pay_by_sic_section(self, pay_type, year = None):
+        pay = []
+        for section_name in self.get_sic_sections():
+            sql = "SELECT -AVG("
+            if pay_type.lower() == "hourly":
+                sql += "DiffMedianHourlyPercent"
+            elif pay_type.lower() == "bonuses":
+                sql += "DiffMedianBonusPercent"
+            sql += """
+            ) FROM pay WHERE company_number IN (
+                SELECT DISTINCT company_number FROM employer_sic WHERE sic_code IN (
+                    SELECT DISTINCT sic_code FROM sic WHERE sic_section = (
+                        SELECT sic_section_id FROM sic_sections WHERE sic_section_name = %s
+                    )
+                )
+            )
+            """
+
+            if year is not None:
+                sql += " AND source LIKE %s"
+
+            sql += ";"
+
+            with self.__connection.cursor() as cursor:
+                # print(sql, (section_name, "%" + year.replace("to", "-") + "%"))
+                if year is None:
+                    cursor.execute(sql, (section_name, ))
+                else:
+                    cursor.execute(sql, (section_name, "%" + year.replace("-", "to") + "%"))
+
+                f = cursor.fetchone()[0]
+                if f is not None:
+                    pay.append((section_name, f))
+        
+        return sorted(pay, key = operator.itemgetter(1), reverse = True)
+
+
+
 if __name__ == "__main__":
     if not os.path.exists(".docker"):
         import dotenv
@@ -303,5 +347,5 @@ if __name__ == "__main__":
         host = "db"
 
     with PayGapDatabase(host = host) as db:
-        print(db.get_pay_by_year("hourly", None, None, "20,000 or more"))
+        print(db.get_pay_by_sic_section("hourly", None))
 
