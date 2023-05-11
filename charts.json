@@ -33,12 +33,32 @@
             }
         },
         {
-            "title": "Pay Difference by SIC Section REallt LONNNNNNNNNNNNNNNNNNNNNNNGGGGGGGGGGGGG",
-            "url": "/plot/sic-section"
+            "title": "Median Hourly pay Difference by SIC Section",
+            "url": "/plot/sic_sec?Pay+Type=Hourly",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Hourly"
+                },
+                "Year": "<Years>"
+            }
         },
         {
-            "title": "Pay Gay by Company Size",
-            "url": "/plot/company-size"   
+            "title": "Median Bonus pay Difference by SIC Section",
+            "url": "/plot/sic_sec?Pay+Type=Bonuses",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Bonuses"
+                },
+                "Year": "<Years>"
+            }
         }
     ]
 }

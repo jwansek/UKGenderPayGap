@@ -10,6 +10,7 @@ function collapseTogglePress(elem, a_elem, num_hidden) {
 
 const PLOT_FUNC_MAPPINGS = {
     "years": draw_plot_years,
+    "sic_sec": draw_plot_sic_sections,
 }
 
 $(document).ready(function() {
@@ -46,7 +47,7 @@ $(document).ready(function() {
 
                 CHARTS["index"].forEach(element => {
                     if (location.href.substr(location.href.indexOf(location.host)+location.host.length).startsWith(element["url"])) {
-                        console.log(location.href.substr(location.href.indexOf(location.host)+location.host.length), element["url"]);
+                        // console.log(location.href.substr(location.href.indexOf(location.host)+location.host.length), element["url"]);
                         filters = element["filters"];
                         // console.log(element);
                     }
@@ -59,8 +60,8 @@ $(document).ready(function() {
 });
 
 function form_api_url(containerName, filters) {
-    console.log(filters);
-    console.log(containerName);
+    // console.log(filters);
+    // console.log(containerName);
     var name = containerName.split("/")[containerName.split("/").length - 1];
     var url = new URL(window.location.origin + "/api/" + name);
     // for (const [filterName, value] of Object.entries(filters)) {
@@ -72,7 +73,7 @@ function form_api_url(containerName, filters) {
     //         }
     //     }       
     // }
-    console.log("fetching ", url.toString());
+    // console.log("fetching ", url.toString());
     return url.toString();
 }
 
@@ -147,11 +148,73 @@ function draw_plot_years(containerName, filters) {
                 series: [{
                     data: data,
                     lineWidth: 4,
-                    showInLegend: showLegend,
+                    showInLegend: false,
                     name: "Pay Gap",
                     color: 'Green',
                     threshold: 0,
                     negativeColor: 'Red',
+                }]
+            })
+        })
+    })
+}
+
+function draw_plot_sic_sections(containerName, filters) {
+    fetch(form_api_url(containerName, filters)).then(resp => {
+        resp.json().then(data => {
+            if (containerName.substring(1, 6) === "chart") {
+                var yAxisTitle = true;
+                var xAxisLabels = true;
+                var showLegend = true;
+            } else {
+                var yAxisTitle = false;
+                var xAxisLabels = false;
+                var showLegend = false;
+            }
+            
+            var categories = [];
+            var pays = [];
+            data.forEach(elem => {
+                categories.push(elem[0]);
+                pays.push(elem[1]);
+            });
+
+            Highcharts.chart(containerName, {
+                chart: {
+                    type: 'bar'
+                },
+
+                title: {
+                    text: null
+                },
+
+                xAxis: {
+                    categories: categories,
+                    labels: {
+                        enabled: xAxisLabels
+                    },
+                    title: {
+                        text: 'SIC Section',
+                        enabled: yAxisTitle
+                    },
+                    type: 'category'
+                },
+
+                yAxis: {
+                    title: {
+                        text: 'Median Pay',
+                        enabled: yAxisTitle
+                    },
+                    labels: {
+                        format: '{value}%'
+                    }
+                },
+
+                series: [{
+                    data: pays,
+                    showInLegend: false,
+                    negativeColor: 'Red',
+                    color: 'Green'
                 }]
             })
         })

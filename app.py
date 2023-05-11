@@ -58,6 +58,20 @@ def api_get_years():
     with database.PayGapDatabase(host = host) as db:
         return flask.jsonify(db.get_pay_by_year(pay_type, sic_section_name = sic_type, employer_size = employer_size, employer_type = employer_type))
 
+@app.route("/api/sic_sec")
+def api_get_sic_section_pay():
+    pay_type = flask.request.args.get("Pay Type")
+    year = flask.request.args.get("year")
+    if pay_type is None or pay_type.lower() not in {'hourly', 'bonuses'}:
+        return flask.abort(400, "The key `pay type` must be equal to 'hourly' or 'bonuses'")
+    with database.PayGapDatabase(host = host) as db:
+        if year is not None:
+            if year not in db.get_years():
+                return flask.abort(400, "Unrecognised year '%s'. The year option must be in %s" % (year, ", ".join(db.get_years())))
+        
+        return flask.jsonify(db.get_pay_by_sic_section(pay_type, year))
+
+
 @app.route("/search")
 def search():
     with database.PayGapDatabase(host = host) as db:
@@ -93,6 +107,8 @@ def serve_large_plot(name):
                 filters[k] = {"options": db.get_company_types()}
             if v == "<CompanySize>":
                  filters[k] = {"options": db.get_company_sizes()}
+            if v == "<Years>":
+                filters[k] = {"options": db.get_years()}
 
     elem["url"] = flask.request.full_path
     # print("elem", elem)

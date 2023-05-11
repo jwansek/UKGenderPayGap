@@ -332,7 +332,7 @@ class PayGapDatabase:
 
                 f = cursor.fetchone()[0]
                 if f is not None:
-                    pay.append((section_name, f))
+                    pay.append((section_name, float(f)))
         
         return sorted(pay, key = operator.itemgetter(1), reverse = True)
 
@@ -347,5 +347,6 @@ if __name__ == "__main__":
         host = "db"
 
     with PayGapDatabase(host = host) as db:
-        print(db.get_pay_by_sic_section("hourly", None))
+        print(db.get_years())
+        print(db.get_pay_by_sic_section("bonuses", None))
 
