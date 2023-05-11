@@ -19,6 +19,16 @@ $(document).ready(function() {
         filterform.action = window.location.pathname + "/apply_click";
     }
     
+    const slider = document.getElementById("yearslider");
+    if (slider !== null) {
+        slider.onchange = function() {
+            fetch("/api/getyears").then(resp => {
+                resp.json().then(years => {
+                    document.getElementById("slider_val").innerHTML = "Year range: " + years[Number(this.value) - 1];
+                });
+            });
+        }
+    }
 
     fetch("/api/charts.json").then((resp) => {
         resp.json().then((body) => {
@@ -188,6 +198,14 @@ function draw_plot_sic_sections(containerName, filters) {
                     text: null
                 },
 
+                plotOptions: {
+                    bar: {
+                        dataLabels: {
+                            align: "center"
+                        }
+                    }
+                },
+
                 xAxis: {
                     categories: categories,
                     labels: {
@@ -207,14 +225,21 @@ function draw_plot_sic_sections(containerName, filters) {
                     },
                     labels: {
                         format: '{value}%'
-                    }
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 2,
+                        color: 'black',
+                        zIndex: 10
+                    }]
                 },
 
                 series: [{
                     data: pays,
                     showInLegend: false,
                     negativeColor: 'Red',
-                    color: 'Green'
+                    color: 'Green',
+                    name: 'Pay Gap'
                 }]
             })
         })

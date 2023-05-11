@@ -26,7 +26,7 @@
 <body>
     <header>
         <a href="/"><h1>{{ title }}</h1></a>
-        <p>Data provided by the <a href="https://gender-pay-gap.service.gov.uk/">UK Government</a></p>
+        <p>Data provided by the <a href="https://gender-pay-gap.service.gov.uk/">UK Government</a> and the <a href="https://www.ons.gov.uk/aboutus/transparencyandgovernance/freedomofinformationfoi/ukpostcodestownsandcounties">Office for National Statistics</a></p>
     </header>
 
     <aside>
@@ -45,24 +45,38 @@
                         </a>
                         <div class="collapsable" id="collapsable/{{ filter_name }}">
                     {% endif %}
-                    {% for option in filter_content["options"] %}
-                        {% if filter_name in current_filters.keys() %}
-                            {% if current_filters[filter_name] == option %}
-                                <input type="radio" id="{{ option }}" name="{{ filter_name }}" value = "{{ option }}" checked="checked">
+                    {% if "yearslider" in filter_content.keys() %}
+                        {% if "year" in current_filters.keys() %}
+                            <p id="slider_val">Year range: {{ current_filters["year"] }}</p>
+                            <input type="range" min="1" max="{{ len(filter_content['yearslider']) }}" value="{{ filter_content['yearslider'].index(current_filters['year']) + 1 }}" name="yearslider" id="yearslider"><br>
+                            <input type="checkbox" id="allyears" name="allyears" value="allyears">
+                            <label for="allyears">All years</label><br>
+                        {% else %}
+                            <p id="slider_val">Year range: {{ filter_content['yearslider'][0] }}</p>
+                            <input type="range" min="1" max="{{ len(filter_content['yearslider']) }}" value="1" name="yearslider" id="yearslider"><br>
+                            <input type="checkbox" id="allyears" name="allyears" value="allyears" checked="checked">
+                            <label for="allyears">All years</label><br>
+                        {% endif %}
+                    {% else %}
+                        {% for option in filter_content["options"] %}
+                            {% if filter_name in current_filters.keys() %}
+                                {% if current_filters[filter_name] == option %}
+                                    <input type="radio" id="{{ option }}" name="{{ filter_name }}" value = "{{ option }}" checked="checked">
+                                {% else %}
+                                    <input type="radio" id="{{ option }}" name="{{ filter_name }}" value = "{{ option }}">
+                                {% endif %}
                             {% else %}
                                 <input type="radio" id="{{ option }}" name="{{ filter_name }}" value = "{{ option }}">
                             {% endif %}
-                        {% else %}
-                            <input type="radio" id="{{ option }}" name="{{ filter_name }}" value = "{{ option }}">
+                            <label for="{{ option }}">{{ option }}</label><br>
+                        {% endfor %}
+                        {% if len(filter_content["default"]) < 2 %}
+                            <input type="radio" id="No filter" name="{{ filter_name }}" value = "No filter">
+                            <label for="No filter">No filter</label><br>
                         {% endif %}
-                        <label for="{{ option }}">{{ option }}</label><br>
-                    {% endfor %}
-                    {% if len(filter_content["default"]) < 2 %}
-                        <input type="radio" id="No filter" name="{{ filter_name }}" value = "No filter">
-                        <label for="No filter">No filter</label><br>
-                    {% endif %}
-                    {% if len(filter_content["options"]) > 5 %}
-                        </div>
+                        {% if len(filter_content["options"]) > 5 %}
+                            </div>
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
                 <input type="submit" value="Apply" id="apply_btn">

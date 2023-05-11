@@ -13,6 +13,9 @@ if not os.path.exists(".docker"):
 else:
     host = "db" 
 
+with open(os.path.join(os.path.dirname(__file__), "static", "ukcounties.json"), "r") as f:
+    UK_GEOJSON = json.load(f)
+
 @app.route("/")
 def serve_index():
     return flask.render_template(
@@ -37,9 +40,20 @@ def search_redirect():
 @app.route("/plot/<name>/apply_click", methods = ["POST"])
 def apply_redirect(name):
     new_args = {}
-    for k, v in flask.request.form.items():
-        if v != "No filter":
+    res = dict(flask.request.form)
+    for k, v in res.items():
+        if k == "allyears":
+            continue
+        if k == "yearslider":
+            with database.PayGapDatabase(host = host) as db:
+                new_args["year"] = db.get_years()[int(v) - 1]
+        elif v != "No filter":
             new_args[k] = v
+
+    
+    if "allyears" in res.keys():
+        if res["allyears"] == "allyears":
+            del new_args["year"]
 
     # print("/" + "/".join(flask.request.full_path.split("/")[1:-1]) + "?" + urllib.parse.urlencode(new_args))
     return flask.redirect("/" + "/".join(flask.request.full_path.split("/")[1:-1]) + "?" + urllib.parse.urlencode(new_args))
@@ -62,6 +76,7 @@ def api_get_years():
 def api_get_sic_section_pay():
     pay_type = flask.request.args.get("Pay Type")
     year = flask.request.args.get("year")
+    # print("year: '%s'" % year)
     if pay_type is None or pay_type.lower() not in {'hourly', 'bonuses'}:
         return flask.abort(400, "The key `pay type` must be equal to 'hourly' or 'bonuses'")
     with database.PayGapDatabase(host = host) as db:
@@ -71,6 +86,10 @@ def api_get_sic_section_pay():
         
         return flask.jsonify(db.get_pay_by_sic_section(pay_type, year))
 
+@app.route("/api/getyears")
+def api_get_year_options():
+    with database.PayGapDatabase(host = host) as db:
+        return flask.jsonify(db.get_years())
 
 @app.route("/search")
 def search():
@@ -108,12 +127,12 @@ def serve_large_plot(name):
             if v == "<CompanySize>":
                  filters[k] = {"options": db.get_company_sizes()}
             if v == "<Years>":
-                filters[k] = {"options": db.get_years()}
+                filters[k] = {"yearslider": db.get_years()}
 
     elem["url"] = flask.request.full_path
     # print("elem", elem)
     current_filters = dict(flask.request.args)
-    # print("current_filters", current_filters)
+    print("current_filters", current_filters)
     return flask.render_template(
         "plot.html.j2",
         title = elem["title"],

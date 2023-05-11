@@ -77,5 +77,10 @@ if __name__ == "__main__":
     else:
         host = "db"
 
-    with database.PayGapDatabase(host = host) as db:
-        print(db.search_company("University"))
+    # with database.PayGapDatabase(host = host) as db:
+    #     print(db.search_company("University"))
+
+    import app
+    counties = [feature["properties"]["name"] for feature in app.UK_GEOJSON["features"]]
+    print(counties)
+    print(len(counties))
