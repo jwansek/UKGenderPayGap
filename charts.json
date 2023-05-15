@@ -1,6 +1,13 @@
 {
     "index": [
         {
+            "title": "Median Hourly Pay by County or Local Authority: Choropleth Map",
+            "url": "/plot/heatmap",
+            "filters": {
+                "Year": "<Years>"
+            }
+        },
+        {
             "title": "Median Hourly Pay Difference by Year",
             "url": "/plot/years?Pay+Type=Hourly",
             "filters": {
@@ -33,7 +40,7 @@
             }
         },
         {
-            "title": "Median Hourly pay Difference by SIC Section",
+            "title": "Median Hourly Pay Difference by SIC Section",
             "url": "/plot/sic_sec?Pay+Type=Hourly",
             "filters": {
                 "Pay Type": {
@@ -47,7 +54,7 @@
             }
         },
         {
-            "title": "Median Bonus pay Difference by SIC Section",
+            "title": "Median Bonus Pay Difference by SIC Section",
             "url": "/plot/sic_sec?Pay+Type=Bonuses",
             "filters": {
                 "Pay Type": {

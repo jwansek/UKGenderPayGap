@@ -11,6 +11,7 @@ function collapseTogglePress(elem, a_elem, num_hidden) {
 const PLOT_FUNC_MAPPINGS = {
     "years": draw_plot_years,
     "sic_sec": draw_plot_sic_sections,
+    "heatmap": draw_heatmap
 }
 
 $(document).ready(function() {
@@ -83,7 +84,7 @@ function form_api_url(containerName, filters) {
     //         }
     //     }       
     // }
-    // console.log("fetching ", url.toString());
+    console.log("fetching ", url.toString());
     return url.toString();
 }
 
@@ -243,5 +244,76 @@ function draw_plot_sic_sections(containerName, filters) {
                 }]
             })
         })
+    })
+}
+
+function draw_heatmap(containerName, filters) {
+    fetch(form_api_url(containerName, filters)).then(resp => {
+
+        const isPreview = (containerName.substring(1, 6) === "chart");
+
+        resp.json().then(data => {
+
+            var data2 = [];
+            data.forEach(row => {
+                data2.push([row[0], row[2]]);
+            });
+            console.log(data2);
+
+            $.getJSON("/static/ukcounties.json", function(geojson) {
+
+                console.log(geojson);
+
+                Highcharts.mapChart(containerName, {
+                    chart: {
+                        map: geojson
+                    },
+            
+                    title: {
+                        text: null
+                    },
+            
+                    accessibility: {
+                        typeDescription: 'Map of the United Kingdom.'
+                    },
+            
+                    mapNavigation: {
+                        enabled: isPreview,
+                        buttonOptions: {
+                            verticalAlign: 'bottom'
+                        }
+                    },
+
+                    legend: {
+                        enabled: isPreview,
+                        layout: 'vertical',
+                        align: 'right',
+                        verticalAlign: 'middle',
+                        itemMarginTop: 10,
+                        itemMarginBottom: 10
+                    },
+            
+                    colorAxis: {
+                        stops: [
+                            [0, '#c4463a'],
+                            [0.5, '#e6ffee'],
+                            [0.9, '#009933']
+                        ],
+                        min: -15
+                    },
+            
+                    series: [{
+                        data: data2,
+                        keys: ['name', 'value'],
+                        joinBy: 'name',
+                        name: 'Pay Gap',
+                        color: 'Green',
+                        tooltip: {
+                            valueSuffix: '%'
+                        }
+                    }]
+                });
+            });       
+        });
     })
 }

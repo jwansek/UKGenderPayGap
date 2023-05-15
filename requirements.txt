@@ -3,3 +3,4 @@ lxml
 python-dotenv
 flask
 requests
+pandas

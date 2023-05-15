@@ -78,4 +78,8 @@ if __name__ == "__main__":
         host = "db"
 
     with database.PayGapDatabase(host = host) as db:
-        parse_csv(db, sys.argv[1])
+        p = sys.argv[1]
+        if os.path.basename(p) == "National_Statistics_Postcode_Lookup_UK.csv":
+            db.append_counties(p)
+        else:
+            parse_csv(db, p)

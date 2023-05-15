@@ -2,11 +2,14 @@ from dataclasses import dataclass
 import operator
 import datetime
 import pymysql
+import pandas
+import app
 import os
 
 @dataclass
 class PayGapDatabase:
     
+    postcode_lookup_obj = None
     host: str = "db"
     user: str = "root"
     passwd: str = None
@@ -336,6 +339,83 @@ class PayGapDatabase:
         
         return sorted(pay, key = operator.itemgetter(1), reverse = True)
 
+    def get_heatmap_data(self, pay_type, year = None):
+        sql = "SELECT  insinuated_loc, COUNT(insinuated_loc), -AVG("
+        if pay_type.lower() == "hourly":
+            sql += "DiffMedianHourlyPercent"
+        elif pay_type.lower() == "bonuses":
+            sql += "DiffMedianBonusPercent"
+        sql += """
+        ) FROM employer INNER JOIN pay ON pay.company_number = employer.company_number
+        WHERE insinuated_loc_type IS NOT NULL
+        """
+        if year is not None:
+            sql += " AND source LIKE %s"
+
+        sql += " GROUP BY insinuated_loc;"
+
+        with self.__connection.cursor() as cursor:
+            if year is None:
+                cursor.execute(sql)
+            else:
+                cursor.execute(sql, ("%" + year.replace("-", "to") + "%", ))
+
+            return [[i[0], i[1], float(i[2])] for i in cursor.fetchall()]
+
+    def _get_postcode_lookup_obj(self, path_):
+        return pandas.read_csv(path_)
+
+    def _get_counties(self):
+        return {feature["properties"]["name"] for feature in app.UK_GEOJSON["features"]}
+
+    def append_counties(self, path_):
+        if self.postcode_lookup_obj is None:
+            self.postcode_lookup_obj = self._get_postcode_lookup_obj(path_)
+
+        counties = self._get_counties()
+        postcodes = self._get_postcodes()
+
+        with self.__connection.cursor() as cursor:
+
+            cursor.execute("ALTER TABLE employer ADD COLUMN IF NOT EXISTS insinuated_loc VARCHAR(69) DEFAULT NULL;")
+            cursor.execute("ALTER TABLE employer ADD COLUMN IF NOT EXISTS insinuated_loc_type VARCHAR(25) DEFAULT NULL;")
+        
+            for i, j in enumerate(postcodes, 1):
+                id_, postcode = j
+                found_locations = self.postcode_lookup_obj[
+                    (self.postcode_lookup_obj["Postcode 1"] == postcode) | 
+                    (self.postcode_lookup_obj["Postcode 2"] == postcode) | 
+                    (self.postcode_lookup_obj["Postcode 3"] == postcode)
+                ]
+                if len(found_locations) == 1:
+                    county, la = found_locations[["County Name", "Local Authority Name"]].values[0]
+                    if la in counties:
+                        cursor.execute("UPDATE employer SET insinuated_loc = %s, insinuated_loc_type = 'Local Authority' WHERE company_number = %s", (la, id_))
+
+                        print("[%d/%d] Using local authority '%s' for postcode '%s'" % (i, len(postcodes), la, postcode))
+                    elif county in counties:
+                        cursor.execute("UPDATE employer SET insinuated_loc = %s, insinuated_loc_type = 'County' WHERE company_number = %s", (county, id_))
+
+                        print("[%d/%d] Using county '%s' for postcode '%s'" % (i, len(postcodes), county, postcode))
+                    elif "Northamptonshire" in la:
+                        print("Manually fixing Northamptonshire...")
+                        cursor.execute("UPDATE employer SET insinuated_loc = %s, insinuated_loc_type = 'County' WHERE company_number = %s", ("Northamptonshire", id_))
+                    elif "Bournemouth" in la:
+                        print("Manually fixing Bournemouth...")
+                        cursor.execute("UPDATE employer SET insinuated_loc = %s, insinuated_loc_type = 'County' WHERE company_number = %s", ("Bournemouth", id_))
+                    else:
+                        print("[%d/%d] Didn't recoginse the local authority '%s' or the county '%s'" % (i, len(postcodes), la, county))
+                else:
+                    print("[%d/%d] Couldn't find a county for postcode '%s' (company id '%s')" % (i, len(postcodes), postcode, id_))
+
+                # break
+        self.__connection.commit()
+
+    def _get_postcodes(self):
+        with self.__connection.cursor() as cursor:
+            cursor.execute("SELECT company_number, TRIM(SUBSTRING_INDEX(address, ',', -1)) FROM employer;")
+            return cursor.fetchall()
+
 
 
 if __name__ == "__main__":
@@ -347,6 +427,8 @@ if __name__ == "__main__":
         host = "db"
 
     with PayGapDatabase(host = host) as db:
-        print(db.get_years())
-        print(db.get_pay_by_sic_section("bonuses", None))
+        # print(db.get_years())
+        # print(db.get_pay_by_sic_section("bonuses", None))
+        print(db.get_heatmap_data("hourly", db.get_years()[0]))
+        # print(db.append_counties())
 
