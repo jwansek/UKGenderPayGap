@@ -103,6 +103,20 @@ def api_get_heatmap_data():
         
         return flask.jsonify(db.get_heatmap_data("hourly", year))
 
+@app.route("/api/size")
+def api_get_size_data():
+    pay_type = flask.request.args.get("Pay Type")
+    year = flask.request.args.get("year")
+    print("year: '%s'" % year)
+    if pay_type is None or pay_type.lower() not in {'hourly', 'bonuses'}:
+        return flask.abort(400, "The key `pay type` must be equal to 'hourly' or 'bonuses'")
+    with database.PayGapDatabase(host = host) as db:
+        if year is not None:
+            if year not in db.get_years():
+                return flask.abort(400, "Unrecognised year '%s'. The year option must be in %s" % (year, ", ".join(db.get_years())))
+        
+        return flask.jsonify(db.get_pay_by_employer_size(pay_type, year))
+
 @app.route("/api/getyears")
 def api_get_year_options():
     with database.PayGapDatabase(host = host) as db:

@@ -416,6 +416,25 @@ class PayGapDatabase:
             cursor.execute("SELECT company_number, TRIM(SUBSTRING_INDEX(address, ',', -1)) FROM employer;")
             return cursor.fetchall()
 
+    def get_pay_by_employer_size(self, pay_type, year = None):
+        sql = "SELECT size, COUNT(size), -AVG("
+        if pay_type.lower() == "hourly":
+            sql += "DiffMedianHourlyPercent"
+        elif pay_type.lower() == "bonuses":
+            sql += "DiffMedianBonusPercent"
+        sql += ") FROM employer INNER JOIN pay ON pay.company_number = employer.company_number"
+        if year is not None:
+            sql += " AND source LIKE %s"
+        sql += " GROUP BY size;"
+
+        with self.__connection.cursor() as cursor:
+            if year is None:
+                cursor.execute(sql)
+            else:
+                cursor.execute(sql, ("%" + year.replace("-", "to") + "%", ))
+
+            return [(i[0], i[1], float(i[2])) for i in cursor.fetchall()]
+
 
 
 if __name__ == "__main__":
@@ -429,6 +448,6 @@ if __name__ == "__main__":
     with PayGapDatabase(host = host) as db:
         # print(db.get_years())
         # print(db.get_pay_by_sic_section("bonuses", None))
-        print(db.get_heatmap_data("hourly", db.get_years()[0]))
+        print(db.get_pay_by_employer_size("hourly", db.get_years()[-1]))
         # print(db.append_counties())
 

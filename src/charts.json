@@ -72,6 +72,21 @@
                 "Year": "<Years>"
             },
             "description": "A bar chart showing median bonus pay gender inequality by SIC Section. SIC is a system that describes the business of an employer. The general trend is the same as hourly median pay, but in some fields such as waste management, transportation and storage, and construction, women are sometimes paid significantly more than men in bonus pay. The user can refine the chart by filtering down to a specific year. The general trend of doing this is that during the years 2019-2020 bonus pay inequality increased, with most employers paying their female employees less, but this trend has not generally continued."
+        },
+        {
+            "title": "Median Hourly Pay Difference by Employer Size",
+            "url": "/plot/size?Pay+Type=Hourly",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Bonuses"
+                },
+                "Year": "<Years>"
+            },
+            "description": "Foo"
         }
     ]
 }

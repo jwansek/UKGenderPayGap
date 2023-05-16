@@ -11,7 +11,8 @@ function collapseTogglePress(elem, a_elem, num_hidden) {
 const PLOT_FUNC_MAPPINGS = {
     "years": draw_plot_years,
     "sic_sec": draw_plot_sic_sections,
-    "heatmap": draw_heatmap
+    "heatmap": draw_heatmap,
+    "size": draw_plot_size,
 }
 
 $(document).ready(function() {
@@ -258,11 +259,11 @@ function draw_heatmap(containerName, filters) {
             data.forEach(row => {
                 data2.push([row[0], row[2]]);
             });
-            console.log(data2);
+            // console.log(data2);
 
             $.getJSON("/static/ukcounties.json", function(geojson) {
 
-                console.log(geojson);
+                // console.log(geojson);
 
                 Highcharts.mapChart(containerName, {
                     chart: {
@@ -314,6 +315,25 @@ function draw_heatmap(containerName, filters) {
                     }]
                 });
             });       
+        });
+    })
+}
+
+
+function draw_plot_size(containerName, filters) {
+    fetch(form_api_url(containerName, filters)).then(resp => {
+        resp.json().then((data) => {
+            console.log(data);
+
+            Highcharts.chart(containerName, {
+                chart: {
+                    type: 'column'
+                },
+
+                title: {
+                    text: null
+                },
+            });
         });
     })
 }
