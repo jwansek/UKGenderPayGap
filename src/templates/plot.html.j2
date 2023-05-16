@@ -1,0 +1,8 @@
+{% extends "template.html.j2" %}
+{% block content %}
+    <figure id="singlechart" class="highcharts-figure">
+        <div class="chart" id="/chart{{ elem['url'] }}">
+        </div>
+        <p id=chart_alt class="highcharts-description">{{ alt }}</p>
+    </figure>  
+{% endblock %}

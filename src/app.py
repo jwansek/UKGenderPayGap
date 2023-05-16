@@ -1,14 +1,17 @@
+from paste.translogger import TransLogger
+from waitress import serve
 import database
 import urllib.parse
 import flask
+import sys
 import json
 import os
 
 app = flask.Flask(__name__)
 
-if not os.path.exists(".docker"):
+if not os.path.exists(os.path.join(os.path.dirname(__file__), "..", ".docker")):
     import dotenv
-    dotenv.load_dotenv(dotenv_path = "db.env")
+    dotenv.load_dotenv(dotenv_path = os.path.join(os.path.dirname(__file__), "..", "db.env"))
     host = "srv.home"
 else:
     host = "db" 
@@ -25,7 +28,7 @@ def serve_index():
     )
 
 def get_charts():
-    with open("charts.json", "r") as f:
+    with open(os.path.join(os.path.dirname(__file__), "charts.json"), "r") as f:
         return json.load(f)
 
 @app.route("/api/charts.json")
@@ -160,11 +163,18 @@ def serve_large_plot(name):
         "plot.html.j2",
         title = elem["title"],
         elem = elem,
-        alt = "Lorem ipsum.",
+        alt = elem["description"],
         filters = filters,
         current_filters = current_filters,
         len = len
     )
 
 if __name__ == "__main__":
-    app.run("0.0.0.0", port = 5005, debug = True)
+    try:
+        if sys.argv[1] == "--production":
+            #serve(TransLogger(app), host='127.0.0.1', port = 6969)
+            serve(TransLogger(app), host='0.0.0.0', port = 5006, threads = 32)
+        else:
+            app.run(host = "0.0.0.0", port = 5005, debug = True)
+    except IndexError:
+        app.run(host = "0.0.0.0", port = 5005, debug = True)

@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+    paygap:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: jwansek/paygap
+        ports:
+            - "5006:5006"
+        networks:
+            - db-network
+        external_links:
+            - mariadb:mysql
+        restart: unless-stopped
+        env_file:
+            - db.env
+
+networks:
+    db-network:
+        external:
+            name: mariadb

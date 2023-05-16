@@ -4,10 +4,10 @@
         <ul>
             {% for elem in charts %}
                 <li>
-                    <div class="chart_container">
+                    <figure class="chart_container">
                         <div class="minichart" id="/minichart{{ elem['url'] }}">
                         </div>
-                    </div>
+                    </figure>
                     <a class="bottom_text" href="{{ elem['url'] }}">{{ elem['title'] }}</a>
                 </li>
             {% endfor %}

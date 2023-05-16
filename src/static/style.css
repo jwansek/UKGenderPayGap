@@ -118,7 +118,11 @@ aside form p {
 #singlechart {
   /* background-color: pink; */
   width: 70%;
-  min-height: 70%;
+  min-height: 90%;
+}
+
+.highcharts-description {
+  font-size: small;
 }
 
 .chart {

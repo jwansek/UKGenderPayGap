@@ -1,0 +1,77 @@
+{
+    "index": 
+    [
+        {
+            "title": "Median Hourly Pay by County or Local Authority: Choropleth Map",
+            "url": "/plot/heatmap",
+            "filters": {
+                "Year": "<Years>"
+            },
+            "description": "A chloropleth map showing gender pay inequality data in the counties or local authorities of the United Kingdom. The general trend is that women get paid 5-15% less but there are some areas in the South of England where women get paid 15% less hourly. There are some parts of South Wales, North Wales or Northern Ireland where women get paid slightly more. In some parts of Scotland hourly pay is nearly equal. The user can adjust the time frame of the data being shown, back to 2017. The default is all years. The general trend is as time continues forwards, fewer parts of the country have equal pay and more pay inequality appears on the map. As with all chloropleth maps, it is important to consider population density."
+        },
+        {
+            "title": "Median Hourly Pay Difference by Year",
+            "url": "/plot/years?Pay+Type=Hourly",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Hourly"
+                },
+                "SIC Type": "<SICType>",
+                "Employer Type": "<CompanyType>",
+                "Employer Size": "<CompanySize>"
+            },
+            "description": "A line plot showing hourly gender pay inequality data from 2017 to today. Hourly pay for women is 12-15% lower for all time periods and hasn't changed much. The user can filter down the data into SIC Categories (SIC is a system of codes to describe what an employer does), employer types (for example a private corporation or overseas entity) and the employer size. The overral trend doesn't change much with these filters, but some fields have more or less gender inequality in hourly pay. For example social work activities, and the accomodation and food industry typically have less inequality, i.e. 6-10% less. The areas with the greatest inequality are in the construction, financial services and education industries, where it can be 20-25% less per hour. Public sector employers typically have more pay inequality, from around 13% to 17%. In terms of number of employees, the general trend is that the more employees an employer has, the less pay inequality there is: From 13% to 9%."
+        },
+        {
+            "title": "Median Bonus Pay Difference by Year",
+            "url": "/plot/years?Pay+Type=Bonuses",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Bonuses"
+                },
+                "SIC Type": "<SICType>",
+                "Employer Type": "<CompanyType>",
+                "Employer Size": "<CompanySize>"
+            },
+            "description": "A line plot showing median bonus pay in a time-series from 2017 to today. In 2017 to 2018 the women received more bonuses than men but in previous years this trend has reduced (from +7% to -7% approximately). The user can filter down the plot according to SIC Categories (SIC is a system of codes to describe what an employer does), employer types (for example a private corporation or overseas entity) and the employer size. The general trend is that employers who work in traditional male dominated areas pay their female employees more in bonues than other areas, for example in waste management storage they are paid more than men. In most other fields, however, women are paid much less in bonses than men. In some field, like health and social work, as well as in education, men and women are generally paid a similar amount in bonuses. Generally private corportations pay their female employers 10% more in bonuses than public sector employers. The number of employees does not seem to have an impact upon the general trend."
+        },
+        {
+            "title": "Median Hourly Pay Difference by SIC Section",
+            "url": "/plot/sic_sec?Pay+Type=Hourly",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Hourly"
+                },
+                "Year": "<Years>"
+            },
+            "description": "A bar chart showing median hourly pay inequality by SIC Section. SIC is a system that describes the business of an employer. All employer types pay their female employees less than their male employees, but the specific amount less varies. In the human health and social works sector, and the accomodation and food industry sectors, for example, it is 5% lower, and in the construction, mining and financial services industries it is 20-24% lower. The user can filter down these results to a specific year section, from 2017 to today. Refining the year does not seem to have an effect upon the general trend."
+        },
+        {
+            "title": "Median Bonus Pay Difference by SIC Section",
+            "url": "/plot/sic_sec?Pay+Type=Bonuses",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Bonuses"
+                },
+                "Year": "<Years>"
+            },
+            "description": "A bar chart showing median bonus pay gender inequality by SIC Section. SIC is a system that describes the business of an employer. The general trend is the same as hourly median pay, but in some fields such as waste management, transportation and storage, and construction, women are sometimes paid significantly more than men in bonus pay. The user can refine the chart by filtering down to a specific year. The general trend of doing this is that during the years 2019-2020 bonus pay inequality increased, with most employers paying their female employees less, but this trend has not generally continued."
+        }
+    ]
+}
