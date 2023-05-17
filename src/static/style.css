@@ -108,6 +108,50 @@ aside form p {
   flex-direction: row-reverse;
 }
 
+/* Use a media query to add a breakpoint at 800px: */
+@media screen and (max-width: 1200px) {
+  #multicharts ul li {
+    width: 100%;
+    min-height: 500px;
+    height: 100%;
+  }
+
+  aside {
+    float: none;
+    margin: auto;
+    width: 25%;
+    display: block;
+    justify-content: center;
+    text-align: center;
+  }
+
+  #searchform {
+    width: 100%;
+    margin: auto;
+  }
+  
+  aside form input[type="submit"] {
+    margin-top: 3px;
+    margin: auto;
+    background-color: black;
+    color: white;
+    border-radius: 5px;
+    border: 2px solid black;
+  }
+
+  
+input[type="search"] {
+  padding: 3px 5px;
+  box-sizing: border-box;
+  border: 2px solid black;
+  margin: auto;
+}
+
+
+
+  /* input[type="search"] {} */
+}
+
 .minichart {
   min-height: 220px;
   width: 100%;
@@ -123,10 +167,6 @@ aside form p {
 
 .highcharts-description {
   font-size: small;
-}
-
-.chart {
-  
 }
 
 .bottom_text {
