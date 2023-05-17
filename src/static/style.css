@@ -108,6 +108,13 @@ aside form p {
   flex-direction: row-reverse;
 }
 
+/* Use a media query to add a breakpoint at 800px: */
+@media screen and (max-width: 1200px) {
+  #multicharts ul li {
+    width: 100%;
+  }
+}
+
 .minichart {
   min-height: 220px;
   width: 100%;
@@ -123,10 +130,6 @@ aside form p {
 
 .highcharts-description {
   font-size: small;
-}
-
-.chart {
-  
 }
 
 .bottom_text {
