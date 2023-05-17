@@ -13,6 +13,7 @@ const PLOT_FUNC_MAPPINGS = {
     "sic_sec": draw_plot_sic_sections,
     "heatmap": draw_heatmap,
     "size": draw_plot_size,
+    "type": draw_plot_type,
 }
 
 $(document).ready(function() {
@@ -32,6 +33,14 @@ $(document).ready(function() {
         }
     }
 
+    if (window.location.pathname.split("/")[1] === "company") {
+        appendEmployerDetails(window.location.pathname.split("/")[2]);
+    }
+
+    if (window.location.pathname.split("/")[2] === "company") {
+        appendEmployerDetails(window.location.pathname.split("/")[3]);
+    }
+
     fetch("/api/charts.json").then((resp) => {
         resp.json().then((body) => {
             const CHARTS = body;
@@ -41,14 +50,29 @@ $(document).ready(function() {
                 var theId = minicharts.item(i).id;
                 var u = new URL(window.location.origin + theId);
                 var theIdSplit = u.pathname.split("/");
+                var filters;
+                // console.log(theIdSplit);
 
-                CHARTS["index"].forEach(element => {
-                    if (theId === "/minichart" + element.url) {
-                        filters = element["filters"];
-                    }
-                });
+                if (theIdSplit[3] === "company") {
 
-                PLOT_FUNC_MAPPINGS[theIdSplit[theIdSplit.length - 1]](theId, filters);
+                    const employer_id = theIdSplit[4];
+
+                    CHARTS["employer"].forEach(element => {
+                        if (theId === "/minichart" + element.url.replace("<employer>", employer_id)) {
+                            filters = element["filters"];
+                        }
+                    });
+                    // console.log("filters", filters);
+                    PLOT_FUNC_MAPPINGS[theIdSplit[theIdSplit.length - 1]](theId, filters);
+                } else {
+                    CHARTS["index"].forEach(element => {
+                        if (theId === "/minichart" + element.url) {
+                            filters = element["filters"];
+                        }
+                    });
+    
+                    PLOT_FUNC_MAPPINGS[theIdSplit[theIdSplit.length - 1]](theId, filters);
+                }
             }
 
             var charts = document.getElementsByClassName("chart");
@@ -71,11 +95,40 @@ $(document).ready(function() {
     })
 });
 
+function appendEmployerDetails(employer_id) {
+    var aside = document.getElementById("theAside");
+    var dl = document.createElement("dl");
+    dl.classList.add("companyInfo")
+
+    fetch("/api/" + employer_id + "/details").then(resp => {
+        resp.json().then(data => {
+            for (const [k, v] of Object.entries(data)) {
+                if (v === null || v === "") {
+                    continue;
+                }
+                if (k.endsWith(" Link")) {
+                    dl.innerHTML += "<dt><a href='" + v + "'>" + k + "</a></dt>";
+                } else {
+                    dl.innerHTML += "<dt>" + k + "</dt><dd>" + v + "</dd>";
+                }
+            }
+        })
+    });
+    
+    aside.appendChild(dl);
+}
+
 function form_api_url(containerName, filters) {
     // console.log(filters);
     // console.log(containerName);
-    var name = containerName.split("/")[containerName.split("/").length - 1];
-    var url = new URL(window.location.origin + "/api/" + name);
+    var s = containerName.split("/");
+    var name = s[s.length - 1];
+    var url;
+    if (s[3] === "company") {
+        url = new URL(window.location.origin + "/api/company/" + s[4] + "/" + name);
+    } else {
+        url = new URL(window.location.origin + "/api/" + name);
+    }
     // for (const [filterName, value] of Object.entries(filters)) {
         
     //     if (typeof value === 'object' && value !== null) {
@@ -120,6 +173,12 @@ function draw_plot_years(containerName, filters) {
                     labels: {
                         format: '{value}%'
                     },
+                    plotLines: [{
+                        value: 0,
+                        width: 2,
+                        color: 'black',
+                        zIndex: 10
+                    }]
                     // tickPositioner: function () {
                     //     // var maxDeviation = Math.ceil(Math.max(Math.abs(this.dataMax), Math.abs(this.dataMin)));
                     //     // var halfMaxDeviation = Math.ceil(maxDeviation / 2);
@@ -319,11 +378,19 @@ function draw_heatmap(containerName, filters) {
     })
 }
 
-
 function draw_plot_size(containerName, filters) {
     fetch(form_api_url(containerName, filters)).then(resp => {
         resp.json().then((data) => {
-            console.log(data);
+            // console.log(data);
+
+            const isPreview = (containerName.substring(1, 6) === "chart");
+
+            var categories = [];
+            var pays = [];
+            data.forEach(elem => {
+                categories.push(elem[0]);
+                pays.push(elem[2]);
+            });
 
             Highcharts.chart(containerName, {
                 chart: {
@@ -333,7 +400,116 @@ function draw_plot_size(containerName, filters) {
                 title: {
                     text: null
                 },
+
+                xAxis: {
+                    categories: categories,
+                    categories: categories,
+                    labels: {
+                        enabled: isPreview
+                    },
+                    title: {
+                        text: 'Number of Employees',
+                        enabled: isPreview
+                    },
+                },
+
+                yAxis: {
+                    title: {
+                        text: 'Median Pay',
+                        enabled: isPreview
+                    },
+                    labels: {
+                        format: '{value}%'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 2,
+                        color: 'black',
+                        zIndex: 10
+                    }]
+                },
+
+                series: [{
+                    data: pays,
+                    lineWidth: 4,
+                    showInLegend: false,
+                    name: "Pay Gap",
+                    color: 'Green',
+                    threshold: 0,
+                    negativeColor: 'Red',
+                }]
             });
         });
     })
+}
+
+function draw_plot_type(containerName, filters) {
+    fetch(form_api_url(containerName, filters)).then(resp => {
+        resp.json().then((data) => {
+            console.log(data);
+
+            const isPreview = (containerName.substring(1, 6) === "chart");
+
+            var categories = [];
+            var pays = [];
+            data.forEach(elem => {
+                categories.push(elem[0]);
+                pays.push(elem[1]);
+            });
+
+            Highcharts.chart(containerName, {
+                chart: {
+                    type: 'bar'
+                },
+
+                title: {
+                    text: null
+                },
+
+                plotOptions: {
+                    bar: {
+                        dataLabels: {
+                            align: "center"
+                        }
+                    }
+                },
+
+                xAxis: {
+                    categories: categories,
+                    labels: {
+                        enabled: isPreview
+                    },
+                    title: {
+                        text: 'Employer Type',
+                        enabled: isPreview
+                    },
+                    type: 'category'
+                },
+
+                yAxis: {
+                    title: {
+                        text: 'Median Pay',
+                        enabled: isPreview
+                    },
+                    labels: {
+                        format: '{value}%'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 2,
+                        color: 'black',
+                        zIndex: 10
+                    }]
+                },
+
+                series: [{
+                    data: pays,
+                    showInLegend: false,
+                    negativeColor: 'Red',
+                    color: 'Green',
+                    name: 'Pay Gap'
+                }]
+            })
+        })
+    });
 }

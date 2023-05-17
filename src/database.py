@@ -302,6 +302,20 @@ class PayGapDatabase:
         with self.__connection.cursor() as cursor:
             cursor.execute("SELECT DISTINCT source FROM pay;")
             return [self._source_name_to_year(i[0]) for i in cursor.fetchall()]
+
+    def get_pay_for_employer(self, pay_type, company_id,):
+        for section_name in self.get_sic_sections():
+            sql = "SELECT source, -AVG("
+            if pay_type.lower() == "hourly":
+                sql += "DiffMedianHourlyPercent"
+            elif pay_type.lower() == "bonuses":
+                sql += "DiffMedianBonusPercent"
+            sql += """
+            ) FROM pay WHERE company_number = %s GROUP BY source ORDER BY source;
+            """
+            with self.__connection.cursor() as cursor:
+                cursor.execute(sql, (company_id, ))
+                return [[i[0], float(i[1])] for i in cursor.fetchall()]
     
     def get_pay_by_sic_section(self, pay_type, year = None):
         pay = []
@@ -340,7 +354,7 @@ class PayGapDatabase:
         return sorted(pay, key = operator.itemgetter(1), reverse = True)
 
     def get_heatmap_data(self, pay_type, year = None):
-        sql = "SELECT  insinuated_loc, COUNT(insinuated_loc), -AVG("
+        sql = "SELECT insinuated_loc, COUNT(insinuated_loc), -AVG("
         if pay_type.lower() == "hourly":
             sql += "DiffMedianHourlyPercent"
         elif pay_type.lower() == "bonuses":
@@ -425,7 +439,7 @@ class PayGapDatabase:
         sql += ") FROM employer INNER JOIN pay ON pay.company_number = employer.company_number"
         if year is not None:
             sql += " AND source LIKE %s"
-        sql += " GROUP BY size;"
+        sql += " GROUP BY size ORDER BY size;"
 
         with self.__connection.cursor() as cursor:
             if year is None:
@@ -433,7 +447,44 @@ class PayGapDatabase:
             else:
                 cursor.execute(sql, ("%" + year.replace("-", "to") + "%", ))
 
-            return [(i[0], i[1], float(i[2])) for i in cursor.fetchall()]
+            return sorted([(i[0], i[1], float(i[2])) for i in cursor.fetchall()], key = lambda e: self.get_company_sizes().index(e[0]))
+
+    def get_pay_by_employer_type(self, pay_type, year = None):
+        sql = "SELECT type_, -AVG("
+        if pay_type.lower() == "hourly":
+            sql += "DiffMedianHourlyPercent"
+        elif pay_type.lower() == "bonuses":
+            sql += "DiffMedianBonusPercent"
+        sql += ") FROM employer INNER JOIN pay ON pay.company_number = employer.company_number WHERE type_ IS NOT NULL"
+        if year is not None:
+            sql += " AND source LIKE %s"
+        sql += " GROUP BY type_;"
+
+        with self.__connection.cursor() as cursor:
+            if year is None:
+                cursor.execute(sql)
+            else:
+                cursor.execute(sql, ("%" + year.replace("-", "to") + "%", ))
+
+            return sorted([(i[0], float(i[1])) for i in cursor.fetchall()], key = operator.itemgetter(1), reverse = True)
+
+    def get_employer_details(self, employer_id):
+        with self.__connection.cursor() as cursor:
+            cursor.execute("SELECT name, address, postcode, policy_link, responsible_person, size, status, type_, incorporated FROM employer WHERE company_number = %s;", (employer_id, ))
+            o = cursor.fetchone()
+
+        return {
+            "Employer Name": o[0].title(),
+            "Address": o[1],
+            "Postcode": o[2],
+            "Policy Link": o[3],
+            "Named responsible person": o[4],
+            "Number of Employees": o[5],
+            "Status": o[6],
+            "Employer Type": o[7],
+            "Incorporated Date": o[8],
+            "Companies House Link": "https://find-and-update.company-information.service.gov.uk/company/" + employer_id
+        }
 
 
 
@@ -448,6 +499,7 @@ if __name__ == "__main__":
     with PayGapDatabase(host = host) as db:
         # print(db.get_years())
         # print(db.get_pay_by_sic_section("bonuses", None))
-        print(db.get_pay_by_employer_size("hourly", db.get_years()[-1]))
+        # print(db.get_pay_for_employer("bonuses", "RC000651"))
+        print(db.get_employer_details("RC000651"))
         # print(db.append_counties())
 

@@ -152,6 +152,14 @@ input[type="search"] {
   /* input[type="search"] {} */
 }
 
+aside dl {
+  font-size: small;
+}
+
+aside dl dt {
+  font-weight: bold;
+}
+
 .minichart {
   min-height: 220px;
   width: 100%;

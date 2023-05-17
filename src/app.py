@@ -107,7 +107,7 @@ def api_get_heatmap_data():
 def api_get_size_data():
     pay_type = flask.request.args.get("Pay Type")
     year = flask.request.args.get("year")
-    print("year: '%s'" % year)
+    # print("year: '%s'" % year)
     if pay_type is None or pay_type.lower() not in {'hourly', 'bonuses'}:
         return flask.abort(400, "The key `pay type` must be equal to 'hourly' or 'bonuses'")
     with database.PayGapDatabase(host = host) as db:
@@ -116,6 +116,20 @@ def api_get_size_data():
                 return flask.abort(400, "Unrecognised year '%s'. The year option must be in %s" % (year, ", ".join(db.get_years())))
         
         return flask.jsonify(db.get_pay_by_employer_size(pay_type, year))
+
+@app.route("/api/type")
+def api_get_type_data():
+    pay_type = flask.request.args.get("Pay Type")
+    year = flask.request.args.get("year")
+    # print("year: '%s'" % year)
+    if pay_type is None or pay_type.lower() not in {'hourly', 'bonuses'}:
+        return flask.abort(400, "The key `pay type` must be equal to 'hourly' or 'bonuses'")
+    with database.PayGapDatabase(host = host) as db:
+        if year is not None:
+            if year not in db.get_years():
+                return flask.abort(400, "Unrecognised year '%s'. The year option must be in %s" % (year, ", ".join(db.get_years())))
+        
+        return flask.jsonify(db.get_pay_by_employer_type(pay_type, year))
 
 @app.route("/api/getyears")
 def api_get_year_options():
@@ -144,11 +158,44 @@ def get_chart_elem(url):
         if url.startswith(i["url"]):
             return i
 
+def get_employer_chart_elem(url, employer):
+    for i in get_charts()["employer"]:
+        if url.startswith(i["url"].replace("<employer>", employer)):
+            return i
+
 def get_chart_elem_strict(url):
     for i in get_charts()["index"]:
         print(urllib.parse.urlsplit(i["url"]).path, urllib.parse.urlsplit(url).path)
         if urllib.parse.urlsplit(i["url"]).path == urllib.parse.urlsplit(url).path:
             return i
+
+@app.route("/api/company/<employer>/years")
+def api_search_years_for_employer(employer):
+    pay_type = flask.request.args.get("Pay Type")
+    if pay_type is None or pay_type.lower() not in {'hourly', 'bonuses'}:
+        return flask.abort(400, "The key `pay type` must be equal to 'hourly' or 'bonuses'")
+    with database.PayGapDatabase(host = host) as db:
+        return flask.jsonify(db.get_pay_for_employer(pay_type, employer))
+
+def process_employer_charts(employercharts, employername):
+    o = employercharts
+    for chart in o:
+        chart["url"] = chart["url"].replace("<employer>", employername)
+    return o
+
+@app.route("/company/<employer>")
+def serve_employer_index(employer):
+    with database.PayGapDatabase(host = host) as db:
+        return flask.render_template(   
+            "index.html.j2",
+            title = db.get_employer_details(employer)["Employer Name"],
+            charts = process_employer_charts(get_charts()["employer"], employer)
+        )   
+
+@app.route("/api/<employer>/details")
+def api_employer_details(employer):
+    with database.PayGapDatabase(host = host) as db:
+        return flask.jsonify(db.get_employer_details(employer))
 
 @app.route("/plot/<name>")
 def serve_large_plot(name):
@@ -171,8 +218,8 @@ def serve_large_plot(name):
     elem["url"] = flask.request.full_path
     # print("elem", elem)
     current_filters = dict(flask.request.args)
-    print("filters", filters)
-    print("current_filters", current_filters)
+    # print("filters", filters)
+    # print("current_filters", current_filters)
     return flask.render_template(
         "plot.html.j2",
         title = elem["title"],
@@ -182,6 +229,24 @@ def serve_large_plot(name):
         current_filters = current_filters,
         len = len
     )
+
+@app.route("/plot/company/<employer>/<name>")
+def serve_employer_large_plot(employer, name):
+    elem = get_employer_chart_elem(flask.request.full_path, employer)
+    elem["url"] = flask.request.full_path
+    filters = elem["filters"]
+    current_filters = dict(flask.request.args)
+    # print(filters, current_filters)
+    with database.PayGapDatabase(host = host) as db:
+        return flask.render_template(
+            "plot.html.j2",
+            title = db.get_employer_details(employer)["Employer Name"] + " " + elem["title"],
+            elem = elem,
+            alt = elem["description"],
+            # filters = filters,
+            # current_filters = current_filters,
+            len = len
+        )
 
 if __name__ == "__main__":
     try:

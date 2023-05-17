@@ -27,6 +27,21 @@
             "description": "A line plot showing hourly gender pay inequality data from 2017 to today. Hourly pay for women is 12-15% lower for all time periods and hasn't changed much. The user can filter down the data into SIC Categories (SIC is a system of codes to describe what an employer does), employer types (for example a private corporation or overseas entity) and the employer size. The overral trend doesn't change much with these filters, but some fields have more or less gender inequality in hourly pay. For example social work activities, and the accomodation and food industry typically have less inequality, i.e. 6-10% less. The areas with the greatest inequality are in the construction, financial services and education industries, where it can be 20-25% less per hour. Public sector employers typically have more pay inequality, from around 13% to 17%. In terms of number of employees, the general trend is that the more employees an employer has, the less pay inequality there is: From 13% to 9%."
         },
         {
+            "title": "Median Hourly Pay Difference by Employer Type",
+            "url": "/plot/type?Pay+Type=Hourly",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Hourly"
+                },
+                "Year": "<Years>"
+            },
+            "description": "foo!"
+        },
+        {
             "title": "Median Bonus Pay Difference by Year",
             "url": "/plot/years?Pay+Type=Bonuses",
             "filters": {
@@ -82,11 +97,72 @@
                         "Hourly",
                         "Bonuses"
                     ],
+                    "default": "Hourly"
+                },
+                "Year": "<Years>"
+            },
+            "description": "A bar chart showing median hourly pay inequality between men and women by the employer size. The general trend is that as the number of employees increases, the pay inequality decreases- from 13% in companies with less than 250 employees, to 9% companies with over 20,000 employees. The user has the option of filtering the results down to a specific year, from 2017 to today. The general trend here is that as the time moves forward, the trend of employers with more employees having less pay inequality becomes more pronounced."
+        },
+        {
+            "title": "Median Bonus Pay Difference by Employer Size",
+            "url": "/plot/size?Pay+Type=Bonuses",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
                     "default": "Bonuses"
                 },
                 "Year": "<Years>"
             },
-            "description": "Foo"
+            "description": "A bar chart showing median bonus pay inequality between men and women, by employer size. The general trend is the converse of median hourly pay, that the larger the employer the greater the pay inequality- from ~12% to 20%. The user can filter down the results to a specific year, from 2017 to today. The trend is the same as for hourly pay: that as time progresses pay inequality continues."
+        },
+        {
+            "title": "Median Bonus Pay Difference by Employer Type",
+            "url": "/plot/type?Pay+Type=Bonuses",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Bonuses"
+                },
+                "Year": "<Years>"
+            },
+            "description": "A bar chart showing median bonus pay inequality by the employer type, for example public and private corporations. There is no real trend to the data, unline with the hourly pay metric.The pay difference typically ranges from 0% to -50%. There are some company types for which women are paid significantly more in bonuses, for example in 'Unregistered Companies', possibly due to a small number of sample sizes. The user has the option of filtering the results down to a specific time-frame, from 2017 today. Doing so makes no new trend appear."
+        }
+    ],
+    "employer":
+    [
+        {
+            "title": "Median Hourly Pay Difference by Year",
+            "url": "/plot/company/<employer>/years?Pay+Type=hourly",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Hourly"
+                }
+            },
+            "description": ""
+        },
+        {
+            "title": "Median Bonus Pay Difference by Year",
+            "url": "/plot/company/<employer>/years?Pay+Type=bonuses",
+            "filters": {
+                "Pay Type": {
+                    "options": [
+                        "Hourly",
+                        "Bonuses"
+                    ],
+                    "default": "Bonuses"
+                }
+            },
+            "description": ""
         }
     ]
 }
