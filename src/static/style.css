@@ -183,6 +183,10 @@ aside dl dt {
   overflow: auto;
 }
 
+#datasetnotes {
+  font-size: x-small;
+}
+
 footer {
   padding-left: 10%;
   padding-right: 10%;

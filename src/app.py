@@ -2,6 +2,8 @@ from paste.translogger import TransLogger
 from waitress import serve
 import database
 import urllib.parse
+import mistune
+import houdini
 import flask
 import sys
 import json
@@ -25,6 +27,33 @@ def serve_index():
         "index.html.j2",
         title = "UK Gender Pay Gap",
         charts = get_charts()["index"]
+    )
+
+class MDRenderer(mistune.HTMLRenderer):
+    def blockcode(self, text, lang):
+        return '\n<pre><code>{}</code></pre>\n'.format(houdini.escape_html(text.strip()))
+
+    def heading(self, text, level):
+        if level == 1:
+            return ""
+        else:
+            return "<h%d>%s</h%d>" % (level + 1, text, level + 1)
+
+@app.route("/datasets")
+def serve_datasets():
+    md = mistune.create_markdown(
+        renderer = MDRenderer(),
+        plugins = ["url"]
+    )
+
+    with open(os.path.join(os.path.dirname(__file__), "..", "README.md"), "r") as f:
+        markdown_txt = f.read()
+    md_html = md(markdown_txt)
+
+    return flask.render_template(
+        "datasets.html.j2",
+        title = "Notes on Datasets",
+        md_html = md_html
     )
 
 def get_charts():

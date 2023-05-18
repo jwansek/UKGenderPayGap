@@ -6,3 +6,5 @@ requests
 pandas
 PasteScript==3.2.0
 waitress
+mistune
+houdini.py
