@@ -11,7 +11,7 @@ services:
         networks:
             - db-network
         external_links:
-            - mariadb:mysql
+            - mariadb:db
         restart: unless-stopped
         env_file:
             - db.env

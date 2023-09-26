@@ -489,7 +489,7 @@ class PayGapDatabase:
 
 
 if __name__ == "__main__":
-    if not os.path.exists(".docker"):
+    if not os.path.exists("/app/.docker"):
         import dotenv
         dotenv.load_dotenv(dotenv_path = "db.env")
         host = "srv.home"

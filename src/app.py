@@ -11,7 +11,7 @@ import os
 
 app = flask.Flask(__name__)
 
-if not os.path.exists(os.path.join(os.path.dirname(__file__), "..", ".docker")):
+if not os.path.exists("/app/.docker"):
     import dotenv
     dotenv.load_dotenv(dotenv_path = os.path.join(os.path.dirname(__file__), "..", "db.env"))
     host = "srv.home"
