@@ -5,7 +5,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get update -y
 RUN apt-get install -y python3-pip 
 COPY . /app
-RUN touch .docker
+RUN touch /.docker && touch /app/.docker
 WORKDIR /app
 RUN pip3 install -r requirements.txt
 ENTRYPOINT ["python3"]
